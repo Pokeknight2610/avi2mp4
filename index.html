@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AVI to MP4 Converter</title>
+</head>
+<body>
+    <input type="file" id="fileInput">
+    <button id="convertButton">Convert to MP4</button>
+    <script src="ffmpeg.min.js"></script>
+    <script>
+        document.getElementById('convertButton').addEventListener('click', function() {
+            var file = document.getElementById('fileInput').files[0];
+            var reader = new FileReader();
+            reader.onload = function() {
+                // Create FFmpeg instance
+                var ffmpeg = new FFmpeg({
+                    arguments: ['-i', 'input.avi', '-c:v', 'libx264', 'output.mp4'],
+                    MEMFS: [{name: 'input.avi', data: new Uint8Array(reader.result)}],
+                    print: function(data) { console.log(data); },
+                    printErr: function(data) { console.error(data); },
+                    onExit: function(code) {
+                        if (code === 0) {
+                            // Get the converted file
+                            var mp4File = ffmpeg.MEMFS[0];
+                            // Do something with the converted file
+                            console.log('Conversion successful!');
+                        } else {
+                            console.error('Error converting file');
+                        }
+                    }
+                });
+                // Run FFmpeg with the arguments set above
+                ffmpeg.run();
+            };
+            reader.readAsArrayBuffer(file);
+        });
+    </script>
+</body>
+</html>
